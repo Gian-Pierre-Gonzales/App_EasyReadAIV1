@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyRead AI</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- SCREEN 1: SPLASH -->
+  <div id="screen-splash" class="screen active splash-bg">
+    <div class="splash-spacer"></div>
+    <div class="logo-center">
+      <span class="logo-text">Easy<strong>Read</strong></span>
+      <span class="logo-badge">AI</span>
+    </div>
+    <div class="splash-spacer"></div>
+    <footer class="app-footer footer-light">
+      <div class="footer-divider"></div>
+      <p class="footer-title">Desarrollado por</p>
+      <div class="footer-authors">
+        <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+        <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SCREEN 2: LOGIN -->
+  <div id="screen-login" class="screen login-bg">
+    <div class="login-overlay">
+      <div class="logo-center logo-dark">
+        <span class="logo-text">Easy<strong>Read</strong></span>
+        <span class="logo-badge">AI</span>
+      </div>
+      <div class="login-card">
+        <h2>Bienvenido</h2>
+        <input type="email" id="login-email" placeholder="piergonzales@gmail.com" value="piergonzales@gmail.com" />
+        <input type="password" id="login-password" placeholder="Contraseña" value="password123" />
+        <a href="#" class="forgot-link">Olvide mi contraseña</a>
+      </div>
+      <button class="btn-primary" onclick="navigate('screen-home')">Iniciar sesión</button>
+      <footer class="app-footer footer-light">
+        <div class="footer-divider"></div>
+        <p class="footer-title">Desarrollado por</p>
+        <div class="footer-authors">
+          <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+          <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: HOME -->
+  <div id="screen-home" class="screen light-bg">
+    <div class="top-bar">
+      <div class="logo-inline">
+        <span class="logo-text-sm">Easy<strong>Read</strong></span>
+        <span class="logo-badge-sm">AI</span>
+      </div>
+      <button class="power-btn" onclick="navigate('screen-login')" aria-label="Cerrar sesión">&#9211;</button>
+    </div>
+
+    <div class="home-content">
+      <p class="greeting">Hola, <strong>Pier Gonzales</strong></p>
+      <h1 class="home-title">Que deseas hacer<br/>el día de hoy?</h1>
+
+      <div class="grid-2x2">
+        <button class="grid-card" onclick="toggleHighContrast(this)" aria-pressed="false">
+          <span class="card-icon">◑</span>
+          <span class="card-label">Alto contraste</span>
+        </button>
+        <button class="grid-card" onclick="toggleLargeFont(this)" aria-pressed="false">
+          <span class="card-icon">Aa</span>
+          <span class="card-label">Letra grande</span>
+        </button>
+        <button class="grid-card" onclick="toggleSimpleMode(this)" aria-pressed="false">
+          <span class="card-icon">✦</span>
+          <span class="card-label">Modo Simple</span>
+        </button>
+        <button class="grid-card" onclick="navigate('screen-voice')" aria-label="Comando de voz">
+          <span class="card-icon">🎙</span>
+          <span class="card-label">Comando de voz</span>
+        </button>
+      </div>
+
+      <p class="section-label">Accesibilidad rápida</p>
+
+      <div class="quick-list">
+        <button class="quick-item" onclick="navigate('screen-reader')">
+          <span class="quick-icon">📄</span>
+          <div class="quick-text">
+            <span class="quick-title">Leer información</span>
+            <span class="quick-sub">Texto con voz y contraste</span>
+          </div>
+          <span class="quick-arrow">›</span>
+        </button>
+        <button class="quick-item" onclick="navigate('screen-voice')">
+          <span class="quick-icon">🎙</span>
+          <div class="quick-text">
+            <span class="quick-title">Asistente de voz</span>
+            <span class="quick-sub">Texto con voz y contraste</span>
+          </div>
+          <span class="quick-arrow">›</span>
+        </button>
+        <button class="quick-item" onclick="navigate('screen-settings')">
+          <span class="quick-icon">☰</span>
+          <div class="quick-text">
+            <span class="quick-title">Configuración</span>
+            <span class="quick-sub">Texto con voz y contraste</span>
+          </div>
+          <span class="quick-arrow">›</span>
+        </button>
+      </div>
+    </div>
+    <footer class="app-footer footer-dark">
+      <div class="footer-divider"></div>
+      <p class="footer-title">Desarrollado por</p>
+      <div class="footer-authors">
+        <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+        <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SCREEN 4: VOICE ASSISTANT -->
+  <div id="screen-voice" class="screen light-bg">
+    <div class="sub-header">
+      <button class="back-btn" onclick="navigate('screen-home')">← Volver</button>
+    </div>
+    <div class="sub-content">
+      <h1 class="sub-title">Asistente de voz</h1>
+
+      <div class="bot-avatar">
+        <span class="bot-icon">🤖</span>
+      </div>
+      <p class="listening-label" id="listening-status">Escuchando...</p>
+
+      <div class="transcript-box">
+        <p class="transcript-label">Escuche:</p>
+        <p class="transcript-text" id="transcript-output">Hola hola hola</p>
+      </div>
+
+      <button class="btn-primary" id="voice-btn" onclick="toggleVoice()">Hablar</button>
+
+      <div class="commands-box">
+        <p class="commands-title">Comandos disponibles</p>
+        <ul class="commands-list">
+          <li><strong>"Ir a inicio"</strong> – Vuelve al inicio</li>
+          <li><strong>"Leer información"</strong> – Abre el lector</li>
+          <li><strong>"Configuración"</strong> – Abre ajustes</li>
+          <li><strong>"Alto contraste"</strong> – Activa/desactiva contraste</li>
+          <li><strong>"Letra grande"</strong> – Aumenta el texto</li>
+        </ul>
+      </div>
+    </div>
+    <footer class="app-footer footer-dark">
+      <div class="footer-divider"></div>
+      <p class="footer-title">Desarrollado por</p>
+      <div class="footer-authors">
+        <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+        <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SCREEN 5: READER -->
+  <div id="screen-reader" class="screen light-bg">
+    <div class="sub-header">
+      <button class="back-btn" onclick="navigate('screen-home')">← Volver</button>
+    </div>
+    <div class="sub-content">
+      <h1 class="sub-title">Lectura de información</h1>
+
+      <div class="font-controls">
+        <button class="font-btn" onclick="changeFontSize(-2)" aria-label="Reducir texto">A-</button>
+        <button class="font-btn font-btn-mid" onclick="changeFontSize(0)" aria-label="Tamaño normal">A</button>
+        <button class="font-btn" onclick="changeFontSize(2)" aria-label="Aumentar texto">A+</button>
+      </div>
+
+      <div class="reader-card">
+        <p class="reader-question">¿Qué es la accesibilidad digital?</p>
+        <p class="reader-body" id="reader-text">
+          La accesibilidad digital se refiere al diseño de productos, dispositivos, servicios y entornos
+          para personas con discapacidades. El objetivo es garantizar que todas las personas,
+          independientemente de sus capacidades, puedan acceder y usar la tecnología de manera efectiva.
+          Incluye aspectos como el uso de lectores de pantalla, navegación por teclado, subtítulos en
+          videos, alto contraste visual y muchas otras adaptaciones que hacen la tecnología más inclusiva.
+          Según la OMS, más de mil millones de personas en el mundo viven con algún tipo de discapacidad,
+          lo que representa aproximadamente el 15% de la población mundial.
+        </p>
+      </div>
+
+      <button class="btn-primary" onclick="speakContent()">Escuchar contenido</button>
+    </div>
+    <footer class="app-footer footer-dark">
+      <div class="footer-divider"></div>
+      <p class="footer-title">Desarrollado por</p>
+      <div class="footer-authors">
+        <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+        <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SCREEN 6: SETTINGS -->
+  <div id="screen-settings" class="screen light-bg">
+    <div class="sub-header">
+      <button class="back-btn" onclick="navigate('screen-home')">← Volver</button>
+    </div>
+    <div class="sub-content">
+      <h1 class="sub-title">Configuración</h1>
+
+      <div class="settings-list">
+        <div class="setting-item">
+          <span class="setting-label">Alto contraste</span>
+          <label class="toggle" aria-label="Alto contraste">
+            <input type="checkbox" id="toggle-contrast" onchange="applyContrast(this)" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">Subtítulos automáticos</span>
+          <label class="toggle" aria-label="Subtítulos automáticos">
+            <input type="checkbox" id="toggle-subtitles" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">Modo cognitivo simplificado</span>
+          <label class="toggle" aria-label="Modo cognitivo simplificado">
+            <input type="checkbox" id="toggle-simple" checked onchange="applySimpleMode(this)" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">Compatibilidad con lector de pantalla</span>
+          <label class="toggle" aria-label="Compatibilidad con lector de pantalla">
+            <input type="checkbox" id="toggle-screenreader" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <footer class="app-footer footer-dark">
+      <div class="footer-divider"></div>
+      <p class="footer-title">Desarrollado por</p>
+      <div class="footer-authors">
+        <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+        <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
