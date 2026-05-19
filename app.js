@@ -8,6 +8,11 @@ function navigate(screenId) {
   }
 }
 
+// ===== INIT LUCIDE ICONS =====
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+
 // ===== SPLASH AUTO-NAVIGATE =====
 window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => navigate('screen-login'), 2000);

@@ -290,9 +290,21 @@ html, body {
   color: var(--white);
 }
 
+.grid-card[aria-pressed="true"] .card-icon svg {
+  stroke: var(--white);
+}
+
 .card-icon {
-  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-dark);
+}
+
+.card-icon i, .card-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.8;
 }
 
 .card-label {
@@ -338,6 +350,27 @@ html, body {
 .quick-icon {
   font-size: 22px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--text-dark);
+}
+
+.quick-icon i, .quick-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+.quick-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--purple);
+}
+
+.quick-arrow i, .quick-arrow svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
 .quick-text {
@@ -357,14 +390,6 @@ html, body {
   font-size: 12px;
   color: var(--text-gray);
 }
-
-.quick-arrow {
-  font-size: 22px;
-  color: var(--purple);
-  font-weight: 300;
-}
-
-/* ===== SUB SCREENS ===== */
 .sub-header {
   padding: 20px 24px 0;
 }
@@ -410,8 +435,20 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
   margin-top: 8px;
+}
+
+.bot-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark);
+}
+
+.bot-icon i, .bot-icon svg {
+  width: 48px;
+  height: 48px;
+  stroke-width: 1.5;
 }
 
 .listening-label {

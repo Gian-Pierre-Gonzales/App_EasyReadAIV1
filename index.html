@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EasyRead AI</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
@@ -67,19 +68,19 @@
 
       <div class="grid-2x2">
         <button class="grid-card" onclick="toggleHighContrast(this)" aria-pressed="false">
-          <span class="card-icon">◑</span>
+          <span class="card-icon"><i data-lucide="contrast"></i></span>
           <span class="card-label">Alto contraste</span>
         </button>
         <button class="grid-card" onclick="toggleLargeFont(this)" aria-pressed="false">
-          <span class="card-icon">Aa</span>
+          <span class="card-icon"><i data-lucide="a-large-small"></i></span>
           <span class="card-label">Letra grande</span>
         </button>
         <button class="grid-card" onclick="toggleSimpleMode(this)" aria-pressed="false">
-          <span class="card-icon">✦</span>
+          <span class="card-icon"><i data-lucide="brain-circuit"></i></span>
           <span class="card-label">Modo Simple</span>
         </button>
         <button class="grid-card" onclick="navigate('screen-voice')" aria-label="Comando de voz">
-          <span class="card-icon">🎙</span>
+          <span class="card-icon"><i data-lucide="mic"></i></span>
           <span class="card-label">Comando de voz</span>
         </button>
       </div>
@@ -88,28 +89,28 @@
 
       <div class="quick-list">
         <button class="quick-item" onclick="navigate('screen-reader')">
-          <span class="quick-icon">📄</span>
+          <span class="quick-icon"><i data-lucide="book-open-text"></i></span>
           <div class="quick-text">
             <span class="quick-title">Leer información</span>
             <span class="quick-sub">Texto con voz y contraste</span>
           </div>
-          <span class="quick-arrow">›</span>
+          <span class="quick-arrow"><i data-lucide="chevron-right"></i></span>
         </button>
         <button class="quick-item" onclick="navigate('screen-voice')">
-          <span class="quick-icon">🎙</span>
+          <span class="quick-icon"><i data-lucide="mic-2"></i></span>
           <div class="quick-text">
             <span class="quick-title">Asistente de voz</span>
             <span class="quick-sub">Texto con voz y contraste</span>
           </div>
-          <span class="quick-arrow">›</span>
+          <span class="quick-arrow"><i data-lucide="chevron-right"></i></span>
         </button>
         <button class="quick-item" onclick="navigate('screen-settings')">
-          <span class="quick-icon">☰</span>
+          <span class="quick-icon"><i data-lucide="settings-2"></i></span>
           <div class="quick-text">
             <span class="quick-title">Configuración</span>
             <span class="quick-sub">Texto con voz y contraste</span>
           </div>
-          <span class="quick-arrow">›</span>
+          <span class="quick-arrow"><i data-lucide="chevron-right"></i></span>
         </button>
       </div>
     </div>
@@ -132,7 +133,7 @@
       <h1 class="sub-title">Asistente de voz</h1>
 
       <div class="bot-avatar">
-        <span class="bot-icon">🤖</span>
+        <span class="bot-icon"><i data-lucide="bot"></i></span>
       </div>
       <p class="listening-label" id="listening-status">Escuchando...</p>
 
