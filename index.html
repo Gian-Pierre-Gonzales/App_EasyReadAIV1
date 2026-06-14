@@ -36,11 +36,20 @@
       </div>
       <div class="login-card">
         <h2>Bienvenido</h2>
-        <input type="email" id="login-email" placeholder="piergonzales@gmail.com" value="piergonzales@gmail.com" />
-        <input type="password" id="login-password" placeholder="Contraseña" value="password123" />
+        <div class="input-group">
+          <input type="email" id="login-email" placeholder="correo@ejemplo.com" value="piergonzales@gmail.com" />
+          <span class="input-error" id="email-error"></span>
+        </div>
+        <div class="input-group">
+          <div class="password-wrapper">
+            <input type="password" id="login-password" placeholder="Contraseña" value="password123" />
+            <button type="button" class="toggle-pass" onclick="togglePassword()" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+          </div>
+          <span class="input-error" id="password-error"></span>
+        </div>
         <a href="#" class="forgot-link">Olvide mi contraseña</a>
       </div>
-      <button class="btn-primary" onclick="navigate('screen-home')">Iniciar sesión</button>
+      <button class="btn-primary" onclick="validateLogin()">Iniciar sesión</button>
       <footer class="app-footer footer-light">
         <div class="footer-divider"></div>
         <p class="footer-title">Desarrollado por</p>
@@ -269,6 +278,14 @@
     <div class="sub-content">
       <h1 class="sub-title">Encuesta de satisfacción</h1>
       <p class="survey-intro">Evalúa tu experiencia con EasyRead AI. Selecciona una opción para cada pregunta.</p>
+
+      <!-- Progress Bar -->
+      <div class="survey-progress">
+        <div class="progress-track">
+          <div class="progress-fill" id="survey-progress-fill" style="width: 0%"></div>
+        </div>
+        <span class="progress-text" id="survey-progress-text">0%</span>
+      </div>
 
       <form id="survey-form" class="survey-form">
         <!-- STEP 0: Datos del usuario -->

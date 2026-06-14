@@ -276,10 +276,15 @@
   <div class="req-box">
     <div class="req-id">RF-01 — Autenticación de usuario</div>
     <span class="badge">Módulo: Login</span>
-    <p class="req-desc">El sistema debe permitir al usuario iniciar sesión con correo electrónico y contraseña.</p>
+    <p class="req-desc">El sistema debe permitir al usuario iniciar sesión con correo electrónico y contraseña, con validaciones de formato y seguridad.</p>
     <strong>Criterios de aceptación:</strong>
     <ul>
       <li>El sistema valida que los campos correo y contraseña no estén vacíos</li>
+      <li>El sistema valida el formato del correo electrónico (debe contener @ y dominio válido)</li>
+      <li>La contraseña requiere un mínimo de 6 caracteres</li>
+      <li>Los mensajes de error se muestran inline debajo de cada campo (no en ventanas emergentes)</li>
+      <li>Los campos con error se resaltan con borde rojo</li>
+      <li>El usuario puede mostrar/ocultar la contraseña con un botón de ojo</li>
       <li>Al ingresar credenciales válidas, redirige al panel principal (Home)</li>
       <li>El sistema muestra un enlace de recuperación de contraseña</li>
       <li>Se muestra pantalla de splash con logo antes del login</li>
@@ -342,7 +347,7 @@
   <div class="req-box">
     <div class="req-id">RF-06 — Asistente de voz</div>
     <span class="badge">Módulo: Voz</span>
-    <p class="req-desc">El sistema debe permitir al usuario navegar y controlar la aplicación mediante comandos de voz.</p>
+    <p class="req-desc">El sistema debe permitir al usuario navegar y controlar la aplicación mediante comandos de voz, con manejo adecuado de errores y timeout.</p>
     <strong>Criterios de aceptación:</strong>
     <ul>
       <li>El usuario puede activar el micrófono con el botón "Hablar"</li>
@@ -350,6 +355,9 @@
       <li>El sistema reconoce y ejecuta los comandos definidos</li>
       <li>El sistema muestra el estado "Escuchando..." mientras el micrófono está activo</li>
       <li>El sistema muestra la lista de comandos disponibles en pantalla</li>
+      <li>Si no se detecta voz en 10 segundos, el sistema muestra mensaje "No se detectó voz (tiempo agotado)" y detiene la escucha</li>
+      <li>Si el navegador no soporta reconocimiento de voz, se muestra mensaje inline "Navegador no compatible" (sin alert)</li>
+      <li>Si el permiso de micrófono es denegado, se muestra mensaje específico "Permiso de micrófono denegado"</li>
     </ul>
     <br/>
     <strong>Comandos disponibles:</strong>
@@ -394,10 +402,12 @@
     <p class="req-desc">El sistema debe permitir registrar datos del participante y realizar una encuesta de satisfacción con escala de Likert, generando reportes descargables.</p>
     <strong>Criterios de aceptación:</strong>
     <ul>
-      <li>Se solicitan datos del participante: nombre completo (obligatorio), edad (obligatoria, rango 10-120) y tipo de discapacidad (opcional: Visual, Auditiva, Motora, Cognitiva, Ninguna, Otra)</li>
+      <li>Se solicitan datos del participante: nombre completo (obligatorio, mínimo 3 caracteres), edad (obligatoria, número entero entre 10-120) y tipo de discapacidad (opcional: Visual, Auditiva, Motora, Cognitiva, Ninguna, Otra)</li>
       <li>La encuesta contiene 7 preguntas con escala de Likert de 5 puntos (Muy en desacuerdo – Muy de acuerdo)</li>
       <li>Las preguntas se dividen en 3 pasos/pantallas (3+2+2 preguntas) con navegación Siguiente/Anterior</li>
       <li>El sistema valida que todas las preguntas del paso actual estén respondidas antes de avanzar</li>
+      <li>Las preguntas no respondidas se resaltan con borde rojo para identificarlas fácilmente</li>
+      <li>Se muestra una barra de progreso visual (0% → 33% → 66% → 100%) que indica el avance del participante</li>
       <li>Incluye campo de comentarios adicionales (opcional) en el último paso</li>
       <li>Al enviar, se genera un reporte con: barras de progreso por pregunta, promedio general, puntaje máximo y mínimo</li>
       <li>Se muestra historial de respuestas con nombre, edad y promedio de cada participante</li>
@@ -737,9 +747,25 @@
     <tr><td>Usuarios no sabían los comandos disponibles</td><td>Sección "Comandos disponibles" visible permanentemente en pantalla de voz</td><td>Medio — reduce curva de aprendizaje</td></tr>
     <tr><td>Texto podía hacerse demasiado pequeño</td><td>Límites min (11px) y max (26px) en el control de tamaño</td><td>Medio — evita texto ilegible</td></tr>
     <tr><td>Sin feedback visual al usar voz</td><td>Animación pulsante en avatar del bot mientras escucha</td><td>Alto — confirma estado activo</td></tr>
+    <tr><td>P1 intentó enviar encuesta sin responder</td><td>Resaltado rojo en preguntas no respondidas + barra de progreso visual</td><td>Alto — previene errores de envío</td></tr>
   </table>
 
-  <h2>9.2 Mejoras técnicas</h2>
+  <h2>9.2 Mejoras de validación</h2>
+  <table>
+    <tr><th>Módulo</th><th>Validación implementada</th><th>Tipo de feedback</th></tr>
+    <tr><td>Login</td><td>Formato de email (regex: contiene @ y dominio)</td><td>Mensaje inline + borde rojo</td></tr>
+    <tr><td>Login</td><td>Contraseña mínimo 6 caracteres</td><td>Mensaje inline + borde rojo</td></tr>
+    <tr><td>Login</td><td>Botón mostrar/ocultar contraseña</td><td>Ícono de ojo interactivo</td></tr>
+    <tr><td>Encuesta</td><td>Nombre mínimo 3 caracteres</td><td>Alerta + borde rojo en campo</td></tr>
+    <tr><td>Encuesta</td><td>Edad: número entero entre 10-120</td><td>Alerta + borde rojo en campo</td></tr>
+    <tr><td>Encuesta</td><td>Preguntas obligatorias por paso</td><td>Borde rojo en pregunta faltante</td></tr>
+    <tr><td>Encuesta</td><td>Barra de progreso visual</td><td>Porcentaje 0% → 100% animado</td></tr>
+    <tr><td>Voz</td><td>Timeout 10 segundos sin detección</td><td>Mensaje inline "No se detectó voz"</td></tr>
+    <tr><td>Voz</td><td>Navegador no compatible</td><td>Mensaje inline sin alert</td></tr>
+    <tr><td>Voz</td><td>Permiso de micrófono denegado</td><td>Mensaje específico en pantalla</td></tr>
+  </table>
+
+  <h2>9.3 Mejoras técnicas</h2>
   <table>
     <tr><th>Área</th><th>Antes</th><th>Después</th></tr>
     <tr><td>Iconos</td><td>Emojis (inconsistentes entre SO)</td><td>Lucide SVG (uniformes, accesibles)</td></tr>
@@ -748,9 +774,12 @@
     <tr><td>Navegación</td><td>Solo táctil/clic</td><td>Multimodo: táctil + voz + teclado</td></tr>
     <tr><td>Tipografía</td><td>Tamaño fijo</td><td>Variables CSS con escalado global</td></tr>
     <tr><td>Evaluación</td><td>Sin mecanismo de feedback</td><td>Encuesta Likert paginada con reportes por usuario</td></tr>
+    <tr><td>Validación login</td><td>Solo campos vacíos + alert</td><td>Regex email + min. caracteres + mensajes inline</td></tr>
+    <tr><td>Validación encuesta</td><td>Solo alert genérico</td><td>Resaltado visual + barra de progreso + validación por paso</td></tr>
+    <tr><td>Voz — errores</td><td>Alert genérico</td><td>Mensajes contextuales inline + timeout automático</td></tr>
   </table>
 
-  <h2>9.3 Mejoras de accesibilidad</h2>
+  <h2>9.4 Mejoras de accesibilidad</h2>
   <ul>
     <li>Atributos <code>aria-label</code> en todos los botones interactivos</li>
     <li>Atributos <code>aria-pressed</code> en botones de estado (toggle)</li>

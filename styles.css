@@ -749,6 +749,104 @@ body.simple-mode .home-title {
   color: var(--purple);
 }
 
+/* ===== VALIDATION STYLES ===== */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.input-error {
+  font-size: 12px;
+  color: #e53935;
+  font-weight: 600;
+  min-height: 16px;
+  padding-left: 4px;
+  display: none;
+}
+
+.input-error.visible {
+  display: block;
+}
+
+.input-group input.error {
+  box-shadow: 0 0 0 2px #e53935;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.toggle-pass {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-gray);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.toggle-pass svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Survey question error highlight */
+.survey-question.has-error {
+  box-shadow: 0 0 0 2px #e53935;
+}
+
+/* Progress bar */
+.survey-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.progress-track {
+  flex: 1;
+  height: 8px;
+  background: #e8e0f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple);
+  min-width: 32px;
+}
+
+/* Voice timeout message */
+.voice-message {
+  font-size: 13px;
+  color: #e53935;
+  font-weight: 600;
+  text-align: center;
+  min-height: 18px;
+}
+
 /* ===== SURVEY STEPS ===== */
 .survey-step {
   display: none;

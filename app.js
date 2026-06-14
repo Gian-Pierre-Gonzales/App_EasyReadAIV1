@@ -100,10 +100,16 @@ function speakContent() {
 // ===== VOICE RECOGNITION =====
 let isListening = false;
 let recognition = null;
+let voiceTimeout = null;
 
 function toggleVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.');
+    const statusEl = document.getElementById('listening-status');
+    if (statusEl) {
+      statusEl.textContent = '⚠ Navegador no compatible';
+      statusEl.classList.add('inactive');
+      statusEl.style.color = '#e53935';
+    }
     return;
   }
 
@@ -129,13 +135,26 @@ function startListening() {
   recognition.onstart = () => {
     isListening = true;
     statusEl.textContent = 'Escuchando...';
+    statusEl.style.color = '';
     statusEl.classList.remove('inactive');
     voiceBtn.textContent = 'Detener';
     voiceBtn.style.background = '#cc0000';
     botAvatar?.classList.add('listening');
+
+    // Timeout: 10 seconds without voice
+    voiceTimeout = setTimeout(() => {
+      if (isListening) {
+        statusEl.textContent = 'No se detectó voz (tiempo agotado)';
+        statusEl.style.color = '#e53935';
+        stopListening();
+      }
+    }, 10000);
   };
 
   recognition.onresult = (event) => {
+    // Clear timeout on any result
+    if (voiceTimeout) { clearTimeout(voiceTimeout); voiceTimeout = null; }
+
     let transcript = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       transcript += event.results[i][0].transcript;
@@ -146,10 +165,19 @@ function startListening() {
 
   recognition.onerror = (event) => {
     console.error('Voice error:', event.error);
+    if (voiceTimeout) { clearTimeout(voiceTimeout); voiceTimeout = null; }
+    if (event.error === 'not-allowed') {
+      statusEl.textContent = '⚠ Permiso de micrófono denegado';
+      statusEl.style.color = '#e53935';
+    } else if (event.error === 'no-speech') {
+      statusEl.textContent = 'No se detectó voz';
+      statusEl.style.color = '#e53935';
+    }
     stopListening();
   };
 
   recognition.onend = () => {
+    if (voiceTimeout) { clearTimeout(voiceTimeout); voiceTimeout = null; }
     stopListening();
   };
 
@@ -192,22 +220,69 @@ function handleVoiceCommand(command) {
 }
 
 // ===== LOGIN VALIDATION =====
-document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn = document.querySelector('#screen-login .btn-primary');
-  if (loginBtn) {
-    loginBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email')?.value.trim();
-      const password = document.getElementById('login-password')?.value;
+function validateLogin() {
+  const emailInput = document.getElementById('login-email');
+  const passwordInput = document.getElementById('login-password');
+  const emailError = document.getElementById('email-error');
+  const passwordError = document.getElementById('password-error');
 
-      if (!email || !password) {
-        alert('Por favor ingresa tu correo y contraseña.');
-        return;
-      }
-      navigate('screen-home');
-    });
+  let valid = true;
+
+  // Reset errors
+  emailInput.classList.remove('error');
+  passwordInput.classList.remove('error');
+  emailError.classList.remove('visible');
+  passwordError.classList.remove('visible');
+  emailError.textContent = '';
+  passwordError.textContent = '';
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email) {
+    emailError.textContent = 'El correo es obligatorio';
+    emailError.classList.add('visible');
+    emailInput.classList.add('error');
+    valid = false;
+  } else if (!emailRegex.test(email)) {
+    emailError.textContent = 'Formato de correo inválido';
+    emailError.classList.add('visible');
+    emailInput.classList.add('error');
+    valid = false;
   }
-});
+
+  // Password validation
+  if (!password) {
+    passwordError.textContent = 'La contraseña es obligatoria';
+    passwordError.classList.add('visible');
+    passwordInput.classList.add('error');
+    valid = false;
+  } else if (password.length < 6) {
+    passwordError.textContent = 'Mínimo 6 caracteres';
+    passwordError.classList.add('visible');
+    passwordInput.classList.add('error');
+    valid = false;
+  }
+
+  if (valid) {
+    navigate('screen-home');
+  }
+}
+
+function togglePassword() {
+  const input = document.getElementById('login-password');
+  const btn = document.querySelector('.toggle-pass');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '<i data-lucide="eye-off"></i>';
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '<i data-lucide="eye"></i>';
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
 
 
 // ===== SURVEY (LIKERT) =====
@@ -234,22 +309,35 @@ function goToStep(step) {
   if (currentStepNum === 0 && step > 0) {
     const name = document.getElementById('survey-name')?.value.trim();
     const age = document.getElementById('survey-age')?.value;
-    if (!name) {
-      alert('Por favor ingresa tu nombre');
+
+    // Clear previous errors
+    document.querySelectorAll('#screen-survey .survey-question').forEach(q => q.classList.remove('has-error'));
+
+    if (!name || name.length < 3) {
+      const nameQ = document.getElementById('survey-name')?.closest('.survey-question');
+      if (nameQ) nameQ.classList.add('has-error');
+      alert('El nombre debe tener al menos 3 caracteres');
       return;
     }
-    if (!age || age < 10 || age > 120) {
-      alert('Por favor ingresa una edad válida');
+    if (!age || isNaN(age) || !Number.isInteger(Number(age)) || age < 10 || age > 120) {
+      const ageQ = document.getElementById('survey-age')?.closest('.survey-question');
+      if (ageQ) ageQ.classList.add('has-error');
+      alert('Ingresa una edad válida (número entero entre 10 y 120)');
       return;
     }
   }
 
-  // Validate current step before moving forward
+  // Validate current step before moving forward (questions)
   if (step > currentStepNum && currentStepNum > 0) {
     const questionsToValidate = stepQuestions[currentStepNum] || [];
+    // Clear previous errors
+    document.querySelectorAll('.survey-step.active .survey-question').forEach(q => q.classList.remove('has-error'));
+
     for (const qNum of questionsToValidate) {
       const selected = document.querySelector(`input[name="q${qNum}"]:checked`);
       if (!selected) {
+        const questionEl = document.querySelector(`.survey-question[data-question="${qNum}"]`);
+        if (questionEl) questionEl.classList.add('has-error');
         alert(`Por favor responde la pregunta ${qNum} antes de continuar`);
         return;
       }
@@ -264,6 +352,18 @@ function goToStep(step) {
     const surveyScreen = document.getElementById('screen-survey');
     if (surveyScreen) surveyScreen.scrollTop = 0;
   }
+
+  // Update progress bar
+  updateSurveyProgress(step);
+}
+
+function updateSurveyProgress(step) {
+  const totalSteps = 4; // 0, 1, 2, 3
+  const percent = Math.round((step / (totalSteps - 1)) * 100);
+  const fill = document.getElementById('survey-progress-fill');
+  const text = document.getElementById('survey-progress-text');
+  if (fill) fill.style.width = percent + '%';
+  if (text) text.textContent = percent + '%';
 }
 
 function getSurveyData() {
@@ -382,8 +482,11 @@ function resetSurvey() {
     form.reset();
     // Reset to step 0
     document.querySelectorAll('.survey-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.survey-question').forEach(q => q.classList.remove('has-error'));
     const step0 = document.querySelector('.survey-step[data-step="0"]');
     if (step0) step0.classList.add('active');
+    // Reset progress
+    updateSurveyProgress(0);
   }
   if (report) report.style.display = 'none';
 }
