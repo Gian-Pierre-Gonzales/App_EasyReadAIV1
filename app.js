@@ -220,6 +220,37 @@ function handleVoiceCommand(command) {
 }
 
 // ===== LOGIN VALIDATION =====
+const USERS_KEY = 'easyread_users';
+const SESSION_KEY = 'easyread_session';
+
+function getUsers() {
+  try {
+    return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function setSession(user) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+
+function getSession() {
+  try {
+    return JSON.parse(localStorage.getItem(SESSION_KEY));
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
 function validateLogin() {
   const emailInput = document.getElementById('login-email');
   const passwordInput = document.getElementById('login-password');
@@ -236,7 +267,7 @@ function validateLogin() {
   emailError.textContent = '';
   passwordError.textContent = '';
 
-  const email = emailInput.value.trim();
+  const email = emailInput.value.trim().toLowerCase();
   const password = passwordInput.value;
 
   // Email validation
@@ -266,14 +297,133 @@ function validateLogin() {
     valid = false;
   }
 
-  if (valid) {
-    navigate('screen-home');
+  if (!valid) return;
+
+  // Check user in localStorage
+  const users = getUsers();
+  const user = users.find(u => u.email === email && u.password === password);
+
+  if (!user) {
+    passwordError.textContent = 'Correo o contraseña incorrectos';
+    passwordError.classList.add('visible');
+    passwordInput.classList.add('error');
+    return;
+  }
+
+  // Login success
+  setSession(user);
+  updateGreeting(user.name);
+  navigate('screen-home');
+}
+
+function validateRegister() {
+  const nameInput = document.getElementById('reg-name');
+  const emailInput = document.getElementById('reg-email');
+  const passwordInput = document.getElementById('reg-password');
+  const confirmInput = document.getElementById('reg-confirm');
+
+  const nameError = document.getElementById('reg-name-error');
+  const emailError = document.getElementById('reg-email-error');
+  const passwordError = document.getElementById('reg-password-error');
+  const confirmError = document.getElementById('reg-confirm-error');
+
+  let valid = true;
+
+  // Reset all
+  [nameInput, emailInput, passwordInput, confirmInput].forEach(i => i.classList.remove('error'));
+  [nameError, emailError, passwordError, confirmError].forEach(e => { e.classList.remove('visible'); e.textContent = ''; });
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim().toLowerCase();
+  const password = passwordInput.value;
+  const confirm = confirmInput.value;
+
+  // Name
+  if (!name || name.length < 3) {
+    nameError.textContent = 'El nombre debe tener al menos 3 caracteres';
+    nameError.classList.add('visible');
+    nameInput.classList.add('error');
+    valid = false;
+  }
+
+  // Email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email) {
+    emailError.textContent = 'El correo es obligatorio';
+    emailError.classList.add('visible');
+    emailInput.classList.add('error');
+    valid = false;
+  } else if (!emailRegex.test(email)) {
+    emailError.textContent = 'Formato de correo inválido';
+    emailError.classList.add('visible');
+    emailInput.classList.add('error');
+    valid = false;
+  } else {
+    // Check if email already exists
+    const users = getUsers();
+    if (users.find(u => u.email === email)) {
+      emailError.textContent = 'Este correo ya está registrado';
+      emailError.classList.add('visible');
+      emailInput.classList.add('error');
+      valid = false;
+    }
+  }
+
+  // Password
+  if (!password) {
+    passwordError.textContent = 'La contraseña es obligatoria';
+    passwordError.classList.add('visible');
+    passwordInput.classList.add('error');
+    valid = false;
+  } else if (password.length < 6) {
+    passwordError.textContent = 'Mínimo 6 caracteres';
+    passwordError.classList.add('visible');
+    passwordInput.classList.add('error');
+    valid = false;
+  }
+
+  // Confirm
+  if (!confirm) {
+    confirmError.textContent = 'Confirma tu contraseña';
+    confirmError.classList.add('visible');
+    confirmInput.classList.add('error');
+    valid = false;
+  } else if (confirm !== password) {
+    confirmError.textContent = 'Las contraseñas no coinciden';
+    confirmError.classList.add('visible');
+    confirmInput.classList.add('error');
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  // Register user
+  const users = getUsers();
+  const newUser = { id: Date.now(), name, email, password, createdAt: new Date().toISOString() };
+  users.push(newUser);
+  saveUsers(users);
+
+  alert('¡Cuenta creada exitosamente! Ahora inicia sesión.');
+  navigate('screen-login');
+
+  // Pre-fill email in login
+  document.getElementById('login-email').value = email;
+}
+
+function updateGreeting(name) {
+  const greeting = document.querySelector('.greeting');
+  if (greeting) {
+    greeting.innerHTML = `Hola, <strong>${name}</strong>`;
   }
 }
 
-function togglePassword() {
-  const input = document.getElementById('login-password');
-  const btn = document.querySelector('.toggle-pass');
+function logout() {
+  clearSession();
+  navigate('screen-login');
+}
+
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
   if (input.type === 'password') {
     input.type = 'text';
     btn.innerHTML = '<i data-lucide="eye-off"></i>';
@@ -283,6 +433,14 @@ function togglePassword() {
   }
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
+
+// Auto-login if session exists
+document.addEventListener('DOMContentLoaded', () => {
+  const session = getSession();
+  if (session) {
+    updateGreeting(session.name);
+  }
+});
 
 
 // ===== SURVEY (LIKERT) =====

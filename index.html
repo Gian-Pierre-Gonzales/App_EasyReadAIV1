@@ -35,21 +35,64 @@
         <span class="logo-badge">AI</span>
       </div>
       <div class="login-card">
-        <h2>Bienvenido</h2>
+        <h2>Iniciar sesión</h2>
         <div class="input-group">
-          <input type="email" id="login-email" placeholder="correo@ejemplo.com" value="piergonzales@gmail.com" />
+          <input type="email" id="login-email" placeholder="correo@ejemplo.com" value="" />
           <span class="input-error" id="email-error"></span>
         </div>
         <div class="input-group">
           <div class="password-wrapper">
-            <input type="password" id="login-password" placeholder="Contraseña" value="password123" />
-            <button type="button" class="toggle-pass" onclick="togglePassword()" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+            <input type="password" id="login-password" placeholder="Contraseña" value="" />
+            <button type="button" class="toggle-pass" onclick="togglePassword('login-password', this)" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
           </div>
           <span class="input-error" id="password-error"></span>
         </div>
         <a href="#" class="forgot-link">Olvide mi contraseña</a>
+        <p class="register-link">¿No tienes cuenta? <a href="#" onclick="navigate('screen-register')">Regístrate aquí</a></p>
       </div>
       <button class="btn-primary" onclick="validateLogin()">Iniciar sesión</button>
+      <footer class="app-footer footer-light">
+        <div class="footer-divider"></div>
+        <p class="footer-title">Desarrollado por</p>
+        <div class="footer-authors">
+          <p class="footer-name">Gonzales Pradinett, Gian Pierre <span class="footer-code">U22210810</span></p>
+          <p class="footer-name">Rios Pineda, Diego <span class="footer-code">U22206216</span></p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- SCREEN 2B: REGISTER -->
+  <div id="screen-register" class="screen login-bg">
+    <div class="login-overlay">
+      <div class="logo-center logo-dark">
+        <span class="logo-text">Easy<strong>Read</strong></span>
+        <span class="logo-badge">AI</span>
+      </div>
+      <div class="login-card">
+        <h2>Crear cuenta</h2>
+        <div class="input-group">
+          <input type="text" id="reg-name" placeholder="Nombre completo" />
+          <span class="input-error" id="reg-name-error"></span>
+        </div>
+        <div class="input-group">
+          <input type="email" id="reg-email" placeholder="correo@ejemplo.com" />
+          <span class="input-error" id="reg-email-error"></span>
+        </div>
+        <div class="input-group">
+          <div class="password-wrapper">
+            <input type="password" id="reg-password" placeholder="Contraseña (mín. 6 caracteres)" />
+            <button type="button" class="toggle-pass" onclick="togglePassword('reg-password', this)" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+          </div>
+          <span class="input-error" id="reg-password-error"></span>
+        </div>
+        <div class="input-group">
+          <input type="password" id="reg-confirm" placeholder="Confirmar contraseña" />
+          <span class="input-error" id="reg-confirm-error"></span>
+        </div>
+        <p class="register-link">¿Ya tienes cuenta? <a href="#" onclick="navigate('screen-login')">Inicia sesión</a></p>
+      </div>
+      <button class="btn-primary" onclick="validateRegister()">Registrarse</button>
       <footer class="app-footer footer-light">
         <div class="footer-divider"></div>
         <p class="footer-title">Desarrollado por</p>
@@ -68,7 +111,7 @@
         <span class="logo-text-sm">Easy<strong>Read</strong></span>
         <span class="logo-badge-sm">AI</span>
       </div>
-      <button class="power-btn" onclick="navigate('screen-login')" aria-label="Cerrar sesión">&#9211;</button>
+      <button class="power-btn" onclick="logout()" aria-label="Cerrar sesión">&#9211;</button>
     </div>
 
     <div class="home-content">
