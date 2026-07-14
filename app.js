@@ -656,7 +656,7 @@ function exportReport() {
     return;
   }
 
-  // Calculate averages
+  // Calculate averages per question
   const qAverages = surveyQuestions.map((_, qi) => {
     const sum = data.reduce((acc, entry) => acc + entry.answers[qi], 0);
     return (sum / data.length).toFixed(1);
@@ -665,69 +665,262 @@ function exportReport() {
   const allAverages = data.map(d => parseFloat(d.average));
   const generalAvg = (allAverages.reduce((a, b) => a + b, 0) / allAverages.length).toFixed(1);
 
-  // Generate HTML report
+  // Likert labels
+  const likertLabels = ['Muy en desacuerdo', 'En desacuerdo', 'Neutral', 'De acuerdo', 'Muy de acuerdo'];
+
+  // Count responses per level per question
+  const distributionRows = surveyQuestions.map((q, qi) => {
+    const counts = [0, 0, 0, 0, 0];
+    data.forEach(entry => { counts[entry.answers[qi] - 1]++; });
+    return { question: q, counts };
+  });
+
+  // Generate HTML report with charts
   const reportHTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
   <title>Reporte Encuesta EasyRead AI</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-    h1 { color: #7B2FFF; }
-    h2 { color: #333; margin-top: 24px; }
-    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-    th { background: #7B2FFF; color: #fff; padding: 10px; text-align: left; }
-    td { padding: 10px; border: 1px solid #ddd; }
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto; color: #111; }
+    h1 { color: #7B2FFF; border-bottom: 3px solid #7B2FFF; padding-bottom: 8px; }
+    h2 { color: #333; margin-top: 32px; border-left: 4px solid #7B2FFF; padding-left: 10px; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 10pt; }
+    th { background: #7B2FFF; color: #fff; padding: 10px; text-align: center; }
+    td { padding: 8px 10px; border: 1px solid #ddd; text-align: center; }
+    td:first-child { text-align: left; }
     tr:nth-child(even) td { background: #f9f6ff; }
-    .stat { display: inline-block; background: #f0e8ff; padding: 12px 24px; border-radius: 12px; margin: 6px; text-align: center; }
-    .stat-val { font-size: 28px; font-weight: 800; color: #7B2FFF; display: block; }
-    .stat-lbl { font-size: 11px; color: #666; }
-    .bar { height: 14px; background: #e8e0f5; border-radius: 7px; margin: 4px 0 12px; }
-    .bar-fill { height: 100%; background: #7B2FFF; border-radius: 7px; }
-    .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #999; }
+    .stat { display: inline-block; background: #f0e8ff; padding: 14px 28px; border-radius: 14px; margin: 8px; text-align: center; }
+    .stat-val { font-size: 32px; font-weight: 800; color: #7B2FFF; display: block; }
+    .stat-lbl { font-size: 11px; color: #666; margin-top: 4px; }
+    .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 16px; }
+    .chart-container { background: #fff; border-radius: 12px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    .level-high { color: #2e7d32; font-weight: 700; }
+    .level-mid { color: #f57c00; font-weight: 700; }
+    .level-low { color: #c62828; font-weight: 700; }
+    @media print {
+      body { padding: 20px; }
+      .charts-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <h1>📊 Reporte de Encuesta — EasyRead AI</h1>
-  <p>Total de respuestas: <strong>${data.length}</strong></p>
-  <p>Fecha de generación: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+  <p>Total de respuestas: <strong>${data.length}</strong> participantes</p>
+  <p>Fecha de generación: <strong>${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</strong></p>
 
-  <div style="text-align:center; margin: 24px 0;">
+  <!-- RESUMEN ESTADÍSTICO -->
+  <div style="text-align:center; margin: 28px 0;">
     <div class="stat"><span class="stat-val">${generalAvg}</span><span class="stat-lbl">Promedio General</span></div>
     <div class="stat"><span class="stat-val">${Math.max(...allAverages).toFixed(1)}</span><span class="stat-lbl">Máximo</span></div>
     <div class="stat"><span class="stat-val">${Math.min(...allAverages).toFixed(1)}</span><span class="stat-lbl">Mínimo</span></div>
+    <div class="stat"><span class="stat-val">${data.length}</span><span class="stat-lbl">Participantes</span></div>
   </div>
 
-  <h2>Resultados por pregunta</h2>
-  <table>
-    <tr><th>#</th><th>Pregunta</th><th>Promedio</th><th>Visual</th></tr>
-    ${surveyQuestions.map((q, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${q}</td>
-      <td><strong>${qAverages[i]}/5</strong></td>
-      <td><div class="bar"><div class="bar-fill" style="width:${(qAverages[i] / 5) * 100}%"></div></div></td>
-    </tr>`).join('')}
-  </table>
+  <!-- GRÁFICOS -->
+  <h2>Gráfico de Satisfacción por Pregunta</h2>
+  <div class="chart-container">
+    <canvas id="barChart" height="300"></canvas>
+  </div>
 
-  <h2>Historial de respuestas</h2>
+  <div class="charts-grid">
+    <div class="chart-container">
+      <h3 style="text-align:center; color:#7B2FFF; margin-bottom:10px;">Nivel de Satisfacción General</h3>
+      <canvas id="doughnutChart" height="250"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 style="text-align:center; color:#7B2FFF; margin-bottom:10px;">Distribución de Respuestas</h3>
+      <canvas id="pieChart" height="250"></canvas>
+    </div>
+  </div>
+
+  <h2>Satisfacción por Participante</h2>
+  <div class="chart-container">
+    <canvas id="lineChart" height="200"></canvas>
+  </div>
+
+  <!-- CUADRO DE RESPUESTAS INDIVIDUALES -->
+  <h2>Cuadro de Satisfacción — Respuestas Individuales</h2>
   <table>
-    <tr><th>Nombre</th><th>Edad</th><th>Discapacidad</th><th>Promedio</th><th>Fecha</th><th>Comentarios</th></tr>
+    <tr>
+      <th>Participante</th>
+      <th>Edad</th>
+      ${surveyQuestions.map((_, i) => `<th>P${i + 1}</th>`).join('')}
+      <th>Promedio</th>
+    </tr>
     ${data.map(entry => `
     <tr>
-      <td>${entry.userName || 'Anónimo'}</td>
+      <td style="text-align:left">${entry.userName || 'Anónimo'}</td>
       <td>${entry.userAge || '—'}</td>
-      <td>${entry.userDisability || '—'}</td>
-      <td>${entry.average}/5</td>
-      <td>${entry.date}</td>
-      <td>${entry.comments || '—'}</td>
+      ${entry.answers.map(a => `<td>${a}</td>`).join('')}
+      <td><strong>${entry.average}</strong></td>
     </tr>`).join('')}
+    <tr style="background:#f0e8ff; font-weight:700;">
+      <td style="text-align:left" colspan="2">PROMEDIO</td>
+      ${qAverages.map(avg => `<td>${avg}</td>`).join('')}
+      <td><strong>${generalAvg}</strong></td>
+    </tr>
   </table>
 
+  <!-- DETALLE POR PARTICIPANTE -->
+  <h2>Detalle por Participante</h2>
+  <table>
+    <tr><th>Nombre</th><th>Edad</th><th>Discapacidad</th><th>Promedio</th><th>Nivel</th><th>Fecha</th><th>Comentarios</th></tr>
+    ${data.map(entry => {
+      const avg = parseFloat(entry.average);
+      const level = avg >= 4 ? '<span class="level-high">Alto</span>' : avg >= 3 ? '<span class="level-mid">Medio</span>' : '<span class="level-low">Bajo</span>';
+      return `
+    <tr>
+      <td style="text-align:left">${entry.userName || 'Anónimo'}</td>
+      <td>${entry.userAge || '—'}</td>
+      <td>${entry.userDisability || '—'}</td>
+      <td><strong>${entry.average}/5</strong></td>
+      <td>${level}</td>
+      <td>${entry.date}</td>
+      <td style="text-align:left">${entry.comments || '—'}</td>
+    </tr>`;
+    }).join('')}
+  </table>
+
+  <!-- GRÁFICO GENERAL RESUMEN -->
+  <h2>Gráfico General de Satisfacción</h2>
+  <div class="chart-container">
+    <canvas id="radarChart" height="350"></canvas>
+  </div>
+
   <div class="footer">
-    <p>EasyRead AI — Encuesta de Satisfacción (Escala de Likert)</p>
+    <p><strong>EasyRead AI</strong> — Encuesta de Satisfacción (Escala de Likert)</p>
     <p>Desarrollado por: Gonzales Pradinett, Gian Pierre (U22210810) | Rios Pineda, Diego (U22206216)</p>
   </div>
+
+  <script>
+    const questions = ${JSON.stringify(surveyQuestions.map((q, i) => 'P' + (i + 1)))};
+    const averages = ${JSON.stringify(qAverages.map(Number))};
+    const participantNames = ${JSON.stringify(data.map(d => d.userName || 'Anónimo'))};
+    const participantAvgs = ${JSON.stringify(allAverages)};
+
+    // Bar Chart - Promedio por pregunta
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: questions,
+        datasets: [{
+          label: 'Promedio (1-5)',
+          data: averages,
+          backgroundColor: 'rgba(123, 47, 255, 0.7)',
+          borderColor: '#7B2FFF',
+          borderWidth: 2,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Doughnut Chart - Satisfacción general
+    const avgVal = ${generalAvg};
+    new Chart(document.getElementById('doughnutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Satisfacción', 'Restante'],
+        datasets: [{
+          data: [avgVal, 5 - avgVal],
+          backgroundColor: ['#7B2FFF', '#e8e0f5'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '70%',
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+
+    // Pie Chart - Distribución general de respuestas
+    const allAnswers = ${JSON.stringify(data.flatMap(d => d.answers))};
+    const dist = [0, 0, 0, 0, 0];
+    allAnswers.forEach(a => dist[a - 1]++);
+    new Chart(document.getElementById('pieChart'), {
+      type: 'pie',
+      data: {
+        labels: ['Muy en desacuerdo', 'En desacuerdo', 'Neutral', 'De acuerdo', 'Muy de acuerdo'],
+        datasets: [{
+          data: dist,
+          backgroundColor: ['#c62828', '#f57c00', '#fdd835', '#66bb6a', '#2e7d32']
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+    });
+
+    // Line Chart - Por participante
+    new Chart(document.getElementById('lineChart'), {
+      type: 'line',
+      data: {
+        labels: participantNames,
+        datasets: [{
+          label: 'Promedio del participante',
+          data: participantAvgs,
+          borderColor: '#7B2FFF',
+          backgroundColor: 'rgba(123, 47, 255, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#7B2FFF',
+          pointRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { min: 0, max: 5, ticks: { stepSize: 1 } } }
+      }
+    });
+
+    // Radar Chart - Gráfico general resumen
+    const fullQuestions = ${JSON.stringify(surveyQuestions)};
+    new Chart(document.getElementById('radarChart'), {
+      type: 'radar',
+      data: {
+        labels: fullQuestions,
+        datasets: [{
+          label: 'Promedio general',
+          data: averages,
+          backgroundColor: 'rgba(123, 47, 255, 0.2)',
+          borderColor: '#7B2FFF',
+          borderWidth: 2,
+          pointBackgroundColor: '#7B2FFF',
+          pointRadius: 5
+        }, {
+          label: 'Meta (5/5)',
+          data: [5, 5, 5, 5, 5, 5, 5],
+          backgroundColor: 'rgba(46, 125, 50, 0.05)',
+          borderColor: '#66bb6a',
+          borderWidth: 1,
+          borderDash: [5, 5],
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            min: 0,
+            max: 5,
+            ticks: { stepSize: 1 },
+            pointLabels: { font: { size: 10 } }
+          }
+        },
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  <\/script>
 </body>
 </html>`;
 

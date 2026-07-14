@@ -275,17 +275,24 @@
 
   <div class="req-box">
     <div class="req-id">RF-01 — Autenticación de usuario</div>
-    <span class="badge">Módulo: Login</span>
-    <p class="req-desc">El sistema debe permitir al usuario iniciar sesión con correo electrónico y contraseña, con validaciones de formato y seguridad.</p>
+    <span class="badge">Módulo: Login / Registro</span>
+    <p class="req-desc">El sistema debe permitir al usuario registrarse con nombre, correo y contraseña, e iniciar sesión con sus credenciales propias almacenadas localmente.</p>
     <strong>Criterios de aceptación:</strong>
     <ul>
-      <li>El sistema valida que los campos correo y contraseña no estén vacíos</li>
-      <li>El sistema valida el formato del correo electrónico (debe contener @ y dominio válido)</li>
-      <li>La contraseña requiere un mínimo de 6 caracteres</li>
+      <li><strong>Registro:</strong> El usuario puede crear una cuenta con nombre completo (mín. 3 caracteres), correo electrónico (formato válido) y contraseña (mín. 6 caracteres)</li>
+      <li><strong>Registro:</strong> El sistema valida que el correo no esté ya registrado</li>
+      <li><strong>Registro:</strong> El sistema requiere confirmación de contraseña (deben coincidir)</li>
+      <li><strong>Registro:</strong> Al registrarse exitosamente, redirige al Login con el email pre-llenado</li>
+      <li><strong>Login:</strong> El sistema valida las credenciales contra los usuarios registrados en localStorage</li>
+      <li><strong>Login:</strong> Si las credenciales son incorrectas, muestra mensaje inline "Correo o contraseña incorrectos"</li>
+      <li><strong>Login:</strong> El sistema valida el formato del correo electrónico (regex: contiene @ y dominio)</li>
+      <li><strong>Login:</strong> La contraseña requiere un mínimo de 6 caracteres</li>
       <li>Los mensajes de error se muestran inline debajo de cada campo (no en ventanas emergentes)</li>
       <li>Los campos con error se resaltan con borde rojo</li>
-      <li>El usuario puede mostrar/ocultar la contraseña con un botón de ojo</li>
-      <li>Al ingresar credenciales válidas, redirige al panel principal (Home)</li>
+      <li>Ambas pantallas tienen botón de ojo para mostrar/ocultar contraseña</li>
+      <li>Enlace de navegación entre Login y Registro ("¿No tienes cuenta?" / "¿Ya tienes cuenta?")</li>
+      <li>Al iniciar sesión, el Home muestra el nombre del usuario autenticado</li>
+      <li>El botón de cerrar sesión limpia la sesión activa y regresa al Login</li>
       <li>El sistema muestra un enlace de recuperación de contraseña</li>
       <li>Se muestra pantalla de splash con logo antes del login</li>
     </ul>
@@ -463,14 +470,27 @@
 <div class="page">
   <h1>4. CASOS DE USO</h1>
 
-  <h2>CU-01: Iniciar sesión</h2>
+  <h2>CU-01A: Registrar cuenta</h2>
   <table>
     <tr><th>Campo</th><th>Detalle</th></tr>
-    <tr><td>Actor</td><td>Usuario</td></tr>
-    <tr><td>Precondición</td><td>El usuario tiene credenciales registradas</td></tr>
-    <tr><td>Flujo principal</td><td>Ingresa correo → Ingresa contraseña → Presiona "Iniciar sesión" → Accede al Home</td></tr>
-    <tr><td>Flujo alternativo</td><td>Campos vacíos → Sistema muestra alerta de validación</td></tr>
-    <tr><td>Postcondición</td><td>Usuario autenticado en el panel principal</td></tr>
+    <tr><td>Actor</td><td>Usuario nuevo</td></tr>
+    <tr><td>Precondición</td><td>El usuario no tiene cuenta registrada</td></tr>
+    <tr><td>Flujo principal</td><td>Presiona "Regístrate aquí" → Ingresa nombre, correo y contraseña → Confirma contraseña → Presiona "Registrarse" → Cuenta creada → Redirige a Login</td></tr>
+    <tr><td>Flujo alternativo 1</td><td>Correo ya registrado → Sistema muestra "Este correo ya está registrado"</td></tr>
+    <tr><td>Flujo alternativo 2</td><td>Contraseñas no coinciden → Sistema muestra "Las contraseñas no coinciden"</td></tr>
+    <tr><td>Flujo alternativo 3</td><td>Campos inválidos → Sistema muestra error inline con borde rojo</td></tr>
+    <tr><td>Postcondición</td><td>Usuario registrado en localStorage, redirigido al Login con email pre-llenado</td></tr>
+  </table>
+
+  <h2>CU-01B: Iniciar sesión</h2>
+  <table>
+    <tr><th>Campo</th><th>Detalle</th></tr>
+    <tr><td>Actor</td><td>Usuario registrado</td></tr>
+    <tr><td>Precondición</td><td>El usuario tiene una cuenta registrada en el sistema</td></tr>
+    <tr><td>Flujo principal</td><td>Ingresa correo → Ingresa contraseña → Presiona "Iniciar sesión" → Sistema valida contra localStorage → Accede al Home con saludo personalizado</td></tr>
+    <tr><td>Flujo alternativo 1</td><td>Credenciales incorrectas → Sistema muestra "Correo o contraseña incorrectos"</td></tr>
+    <tr><td>Flujo alternativo 2</td><td>Formato de email inválido → Sistema muestra error inline</td></tr>
+    <tr><td>Postcondición</td><td>Sesión activa, Home muestra nombre del usuario</td></tr>
   </table>
 
   <h2>CU-02: Activar modo alto contraste</h2>
@@ -544,7 +564,7 @@
       <th>Caso de Uso</th>
       <th>Prioridad</th>
     </tr>
-    <tr><td>RF-01 Autenticación</td><td>Login / Splash</td><td>CU-01</td><td>Alta</td></tr>
+    <tr><td>RF-01 Autenticación</td><td>Login / Registro / Splash</td><td>CU-01A / CU-01B</td><td>Alta</td></tr>
     <tr><td>RF-02 Panel principal</td><td>Home</td><td>—</td><td>Alta</td></tr>
     <tr><td>RF-03 Alto contraste</td><td>Home / Configuración</td><td>CU-02</td><td>Alta</td></tr>
     <tr><td>RF-04 Letra grande</td><td>Home</td><td>—</td><td>Media</td></tr>
@@ -591,11 +611,15 @@
 
   <h2>7.2 Módulos implementados</h2>
 
-  <h3>Módulo de autenticación</h3>
+  <h3>Módulo de autenticación (Registro + Login)</h3>
   <ul>
-    <li>Validación de campos vacíos antes de permitir acceso</li>
+    <li><strong>Registro:</strong> Formulario con nombre, email, contraseña y confirmación. Validaciones: nombre mín. 3 chars, email con regex, contraseña mín. 6 chars, confirmación coincidente, email no duplicado</li>
+    <li><strong>Login:</strong> Validación de credenciales contra usuarios almacenados en localStorage. Mensajes de error inline por campo</li>
+    <li><strong>Sesión:</strong> Al iniciar sesión se guarda sesión activa (localStorage). El Home muestra el nombre del usuario autenticado</li>
+    <li><strong>Cerrar sesión:</strong> Limpia la sesión y regresa al Login</li>
+    <li><strong>Seguridad:</strong> Botón mostrar/ocultar contraseña en ambos formularios</li>
     <li>Transición automática Splash → Login (2 segundos)</li>
-    <li>Enlace funcional de recuperación de contraseña</li>
+    <li>Navegación bidireccional entre Login y Registro</li>
   </ul>
 
   <h3>Módulo de accesibilidad visual</h3>
